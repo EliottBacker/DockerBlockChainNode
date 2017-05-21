@@ -1,23 +1,23 @@
-FROM eliottbacker/debian-ssh
+FROM debian:jessie
 
 MAINTAINER Eliott BACKER "eliott.backer@gmail.com"
 
+ENV PACKAGE_NAME multichain-1.0-beta-1
+
 ENV DEBIAN_FRONTEND noninteractive
 
-RUN apt-get -qq update
+RUN apt-get -qq update \
+  && apt-get upgrade -yqq \
+  && apt-get dist-upgrade -yqq \
+  && apt-get install -yqq wget curl \
+  && apt-get clean \
+  && rm -rf /var/lib/apt/lists/* \
+  && cd /tmp \
+  && wget http://www.multichain.com/download/${PACKAGE_NAME}.tar.gz \
+  && tar -xvzf ${PACKAGE_NAME}.tar.gz \
+  && cd ${PACKAGE_NAME} \
+  && mv multichaind multichain-cli multichain-util /usr/local/bin \
+  && cd /tmp \
+  && rm -Rf multichain*
 
-# install multichain
-RUN cd /tmp && \
-  wget http://www.multichain.com/download/multichain-1.0-beta-1.tar.gz && \
-  tar -xvzf multichain-1.0-beta-1.tar.gz && \
-  cd multichain-1.0-beta-1 && \
-  mv multichaind multichain-cli multichain-util /usr/local/bin && \
-  cd /tmp && \
-  rm -Rf multichain*
-
-VOLUME [ "/opt/chains" ]
-
-EXPOSE 8333 8332 18333 18332
-
-ENTRYPOINT [ "/usr/local/bin/multichaind", "-datadir=/opt/chains" ]
-
+CMD ["/bin/bash"]
